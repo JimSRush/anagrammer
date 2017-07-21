@@ -50,15 +50,9 @@ func readDict() map[string][]string {
 	for scanner.Scan() {
 		s.words++
 		w := strings.ToLower(scanner.Text())
-		//Sort the word to find the collision
+		//Sort the word to find the key
 		sorted := sortWord(w)
-		if _, ok := words[sorted]; ok {
-			//If the key exists, append the word to the slicef
-			words[sorted] = append(words[sorted], w)
-		} else {
-			words[sorted] = []string{w}
-			s.keys++
-		}
+		words[sorted] = append(words[sorted], w)
 	}
 	fmt.Printf("Stats are %+v\n", s)
 	return words
