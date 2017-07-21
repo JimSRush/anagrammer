@@ -1,34 +1,35 @@
 package main
 
-import "fmt"
-import "os"
-import "bufio"
-import "log"
-import "strings"
-import "sort"
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"sort"
+	"strings"
+)
 
-var anagrams map[string][]string
+var anagrams = readDict()
 
 type stats struct {
 	words int
+	keys  int
 }
 
 func main() {
-	anagrams = readDict()
 	listen()
 }
 
 func listen() {
-
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter a word then enter: ")
 	text, _ := reader.ReadString('\n')
-	fmt.Println(findAnagrams(text))
+	fmt.Println("Anagrams are: ", findAnagrams(text))
 }
 
 func findAnagrams(word string) []string {
-	fmt.Print("Finding anagram of ", word)
-	w := strings.ToLower(word)
+	w := sortWord(strings.ToLower(word))
+
 	if v, ok := anagrams[w]; ok {
 		return v
 	}
@@ -43,29 +44,28 @@ func readDict() map[string][]string {
 	defer file.Close()
 
 	words := make(map[string][]string)
-
 	scanner := bufio.NewScanner(file)
-
-	s := stats{words: 0}
+	s := stats{words: 0, keys: 0}
 
 	for scanner.Scan() {
 		s.words++
 		w := strings.ToLower(scanner.Text())
 		//Sort the word to find the collision
 		sorted := sortWord(w)
-		if v, ok := words[sorted]; ok {
-			//If the key exists, append the word to the slice
-			v = append(v, w)
-		} else {
+		if _, ok := words[sorted]; ok {
+			//If the key exists, append the word to the slicef
 			words[sorted] = append(words[sorted], w)
+		} else {
+			words[sorted] = []string{w}
+			s.keys++
 		}
 	}
-
+	fmt.Printf("Stats are %+v\n", s)
 	return words
 }
 
 func sortWord(w string) string {
 	s := strings.Split(w, "")
 	sort.Strings(s)
-	return strings.Join(s, "")
+	return strings.TrimSpace(strings.Join(s, ""))
 }
